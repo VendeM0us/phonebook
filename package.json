@@ -7,7 +7,10 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node app.js",
-    "dev": "nodemon app.js"
+    "dev": "nodemon app.js",
+    "build:ui": "rm -rf dist && cd ../phonebook/ && yarn build && cp -r dist ../phonebook_backend",
+    "deploy": "git add -A && git commit -m \"update and deploy\" && git push",
+    "deploy:full": "yarn build:ui && yarn deploy"
   },
   "author": "Mayolito Waje",
   "license": "ISC",
