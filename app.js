@@ -1,9 +1,13 @@
 import express from 'express';
+import cors from 'cors';
 import { entries, generateId } from './data.js';
 import morgan from 'morgan';
 const app = express();
 
+app.use(cors());
 app.use(express.json());
+app.use(express.static('dist'));
+
 app.use(morgan((tokens, req, res) => {
   return [
     tokens.method(req, res),
