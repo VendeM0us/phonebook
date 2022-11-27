@@ -67,5 +67,5 @@ app.use((req, res) => {
   res.status(404).send('Entry not found');
 })
 
-const port = 3000;
+const port = process.env.port || 3000;
 app.listen(port, () => console.log(`Server is listening on port ${port}`));
