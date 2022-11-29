@@ -21,18 +21,43 @@ app.use(morgan((tokens, req, res) => {
 }));
 
 app.get('/api/persons/:id', async (req, res, next) => {
-  const foundPerson = await Person.findById(req.params.id);
-  foundPerson ? res.json(foundPerson) : next();
+  try {
+    const foundPerson = await Person.findById(req.params.id);
+    foundPerson ? res.json(foundPerson) : next();
+  } catch (e) {
+    console.error(e);
+
+    e.status = 400;
+    e.message = 'Malformatted id';
+    next(e);
+  }
 });
 
-app.put('/api/persons/:id', async (req, res) => {
-  const updatePerson = await Person.findByIdAndUpdate(req.params.id, req.body, { returnDocument: 'after' });
-  res.json(updatePerson);
+app.put('/api/persons/:id', async (req, res, next) => {
+  try {
+    const updatePerson = await Person.findByIdAndUpdate(req.params.id, req.body, { returnDocument: 'after' });
+    res.json(updatePerson);
+  } catch (e) {
+    e.status = 400;
+    console.error(e);
+    
+    e.status = 400;
+    e.message = 'Malformatted id';
+    next(e);
+  }
 })
 
-app.delete('/api/persons/:id', async (req, res) => {
-  await Person.findByIdAndDelete(req.params.id);
-  res.status(204).send();
+app.delete('/api/persons/:id', async (req, res, next) => {
+  try {
+    await Person.findByIdAndDelete(req.params.id);
+    res.status(204).send();
+  } catch (e) {
+    console.error(e);
+    
+    e.status = 400;
+    e.message = 'Malformatted id';
+    next(e);
+  }
 });
 
 app.get('/api/persons', async (req, res) => {
@@ -72,7 +97,16 @@ app.get('/info', async (req, res) => {
 
 app.use((req, res) => {
   res.status(404).send('Entry not found');
-})
+});
+
+app.use((err, req, res, next) => {
+  const status = err.status || 500;
+
+  res.status(status).json({
+    error: err.message,
+    status: status
+  })
+});
 
 const port = process.env.port || 3000;
 app.listen(port, () => console.log(`Server is listening on port ${port}`));
