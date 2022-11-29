@@ -1,7 +1,8 @@
 import express from 'express';
 import cors from 'cors';
-import { entries, generateId } from './data.js';
+import Person from './models/person.js';
 import morgan from 'morgan';
+
 const app = express();
 
 app.use(cors());
@@ -19,51 +20,53 @@ app.use(morgan((tokens, req, res) => {
   ].join(' ');
 }));
 
-app.get('/api/persons/:id', (req, res, next) => {
-  const id = Number(req.params.id);
-  const retrievedEntry = entries.find(entry => entry.id === id);
-
-  if (!retrievedEntry) next();
-  res.json(retrievedEntry);
+app.get('/api/persons/:id', async (req, res, next) => {
+  const foundPerson = await Person.findById(req.params.id);
+  foundPerson ? res.json(foundPerson) : next();
 });
 
-app.delete('/api/persons/:id', (req, res) => {
-  const id = Number(req.params.id);
-  const index = entries.findIndex(entry => entry.id === id);
-  entries.splice(index, 1);
+app.put('/api/persons/:id', async (req, res) => {
+  const updatePerson = await Person.findByIdAndUpdate(req.params.id, req.body, { returnDocument: 'after' });
+  res.json(updatePerson);
+})
+
+app.delete('/api/persons/:id', async (req, res) => {
+  await Person.findByIdAndDelete(req.params.id);
   res.status(204).send();
 });
 
-app.get('/api/persons', (req, res) => {
-  res.json(entries);
+app.get('/api/persons', async (req, res) => {
+  const data = await Person.find({});
+  res.json(data);
 });
 
-app.post('/api/persons', (req, res) => {
-  const entryAlreadyExist = entries.find(entry => entry.name === req.body.name);
+app.post('/api/persons', async (req, res) => {
+  const newName = req.body.name;
+  const newNum = req.body.number;
+  const nameAlreadyExist = await Person.findOne({name: newName}).exec();
 
-  if (!req.body.name || !req.body.number) {
+  if (!newName || !newNum) {
     res.status(400).json({
-      Error: "Incomplete entry data"
+      error: "Incomplete request body data (400)"
     })
-  } else if (entryAlreadyExist) {
+  } else if (nameAlreadyExist) {
     res.status(400).json({
-      Error: "Name must be unique"
+      error: "Name already exists"
     })
   } else {
-    const newEntry = {
-      id: generateId(),
-      name: req.body.name,
-      number: req.body.number,
-    };
-  
-    entries.push(newEntry);
-    res.json({ ...newEntry, created: new Date().toString() });
+    const newPerson = new Person({
+      name: newName,
+      number: newNum
+    })
+
+    const createdPerson = await newPerson.save();
+    res.status(201).json(createdPerson);
   }
 });
 
-app.get('/info', (req, res) => {
+app.get('/info', async (req, res) => {
   const retrieveDate = new Date().toString();
-  const entriesCount = entries.length;
+  const entriesCount = await Person.estimatedDocumentCount();
   res.send(`Phonebook has info for ${entriesCount} people\n${retrieveDate}`);
 });
 
