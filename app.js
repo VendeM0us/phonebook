@@ -35,8 +35,8 @@ app.get('/api/persons/:id', async (req, res, next) => {
 
 app.put('/api/persons/:id', async (req, res, next) => {
   try {
-    const updatePerson = await Person.findByIdAndUpdate(req.params.id, req.body, { returnDocument: 'after' });
-    res.json(updatePerson);
+    const updatePerson = await Person.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    updatePerson ? res.json(updatePerson) : next();
   } catch (e) {
     e.status = 400;
     console.error(e);
@@ -68,16 +68,16 @@ app.get('/api/persons', async (req, res) => {
 app.post('/api/persons', async (req, res) => {
   const newName = req.body.name;
   const newNum = req.body.number;
-  const nameAlreadyExist = await Person.findOne({name: newName}).exec();
+  const nameAlreadyExist = await Person.findOne({name: newName});
 
   if (!newName || !newNum) {
     res.status(400).json({
       error: "Incomplete request body data (400)"
     })
   } else if (nameAlreadyExist) {
-    res.status(400).json({
-      error: "Name already exists"
-    })
+    const id = nameAlreadyExist.id;
+    const updatedPerson = await Person.findByIdAndUpdate(id, { number: newNum }, { new: true });
+    res.json(updatedPerson);
   } else {
     const newPerson = new Person({
       name: newName,
