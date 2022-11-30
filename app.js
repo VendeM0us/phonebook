@@ -63,22 +63,23 @@ app.get('/api/persons', async (req, res) => {
 
 app.post('/api/persons', async (req, res, next) => {
   const body = req.body;
-
-  const person = new Person({
-    name: body.name,
-    number: body.number,
-  });
+  const personExist = await Person.findOne({ name: body.name });
 
   try {
-    const personExist = await Person.findOne({ name: body.name });
-
     if (personExist) {
       const id = personExist.id;
+      
       const updatedPerson = await Person.findByIdAndUpdate(id, 
         { number: body.number },
         { new: true, runValidators: true, context: 'query' });
+  
       res.json(updatedPerson);
     } else {
+      const person = new Person({
+        name: body.name,
+        number: body.number,
+      });
+  
       const newPerson = await person.save();
       res.status(201).json(newPerson);
     }
@@ -94,26 +95,26 @@ app.get('/info', async (req, res) => {
 });
 
 app.use((req, res) => {
-  res.status(404).send('Entry not found');
+  return res.status(404).send('Entry not found');
 });
 
 app.use((err, req, res, next) => {
   console.error(err);
 
   if (err.name === 'CastError') {
-    res.status(400).json({ error: 'malformatted id' });
+    return res.status(400).json({ error: 'malformatted id' });
   } else if (err.name === 'ValidationError') {
-    res.status(400).json({ error: err.message });
+    return res.status(400).json({ error: err.message });
   }
 
   next(err);
 });
 
 app.use((err, req, res, next) => {
-  res.status(500).json({
+  return res.status(500).json({
     error: err.message,
     status: 500
-  })
+  });
 });
 
 const port = process.env.port || 3000;
