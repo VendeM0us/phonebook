@@ -73,7 +73,6 @@ app.post('/api/persons', async (req, res, next) => {
     const personExist = await Person.findOne({ name: body.name });
 
     if (personExist) {
-      console.log('person exists');
       const id = personExist.id;
       const updatedPerson = await Person.findByIdAndUpdate(id, 
         { number: body.number },
