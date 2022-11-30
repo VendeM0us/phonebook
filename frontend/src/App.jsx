@@ -54,8 +54,9 @@ function App() {
             clearInput()
           })
           .catch(e => {
+            console.log(e.response.data.error)
             setMessage({
-              message: `Information of ${updateRecord.name} has already been removed from the server`,
+              message: e.response.data.error,
               error: true
             });
             clearNotif();
@@ -77,6 +78,15 @@ function App() {
             message: `Added ${createdRecord.name}`,
             error: false
           })
+          clearNotif();
+          clearInput();
+        })
+        .catch(e => {
+          console.log(e.response.data.error);
+          setMessage({
+            message: e.response.data.error,
+            error: true
+          });
           clearNotif();
           clearInput();
         });

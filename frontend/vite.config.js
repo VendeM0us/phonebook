@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
-      '/': 'https://vendemous-phonebook.cyclic.app'
+      '/': 'http://localhost:3000/'
     }
   }
 })
