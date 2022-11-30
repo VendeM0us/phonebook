@@ -10,11 +10,15 @@
     "dev": "nodemon app.js",
     "build:ui": "rm -rf dist && cd frontend/ && yarn build && cp -r dist ../ && rm -r dist",
     "deploy": "git add -A && git commit -m \"update and deploy\" && git push",
-    "deploy:full": "yarn build:ui && yarn deploy"
+    "deploy:full": "yarn build:ui && yarn deploy",
+    "lint": "eslint --ext .jsx .",
+    "lint:fix": "eslint --fix --ext .jsx ."
   },
   "author": "Mayolito Waje",
   "license": "ISC",
   "devDependencies": {
+    "eslint": "^8.28.0",
+    "eslint-plugin-react": "^7.31.11",
     "nodemon": "^2.0.20"
   },
   "dependencies": {

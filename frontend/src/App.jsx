@@ -30,7 +30,7 @@ function App() {
 
   const clearNotif = () => {
     setTimeout(() => setMessage(null), 5000);
-  }
+  };
 
   const addPerson = (event) => {
     event.preventDefault();
@@ -51,10 +51,10 @@ function App() {
             });
             clearNotif();
             setPersons(persons.map(p => p.id !== updatedRecord.id ? p : updatedRecord));
-            clearInput()
+            clearInput();
           })
           .catch(e => {
-            console.log(e.response.data.error)
+            console.log(e.response.data.error);
             setMessage({
               message: e.response.data.error,
               error: true
@@ -77,7 +77,7 @@ function App() {
           setMessage({
             message: `Added ${createdRecord.name}`,
             error: false
-          })
+          });
           clearNotif();
           clearInput();
         })
@@ -91,7 +91,7 @@ function App() {
           clearInput();
         });
     }
-  }
+  };
 
   const handleDelete = event => {
     const id = event.target.dataset.noteId;
@@ -101,16 +101,16 @@ function App() {
     if (confirmDelete) {
       phonebookServer
         .deleteRecord(id)
-        .then(res => {
+        .then(() => {
           setMessage({
             message: `Successfully deleted: ${person.name}`,
             error: false
           });
           clearNotif();
           setPersons(persons.filter(p => p.id !== id));
-        })
+        });
     }
-  }
+  };
 
   const handleFilterWord = (event) => setFilterWord(event.target.value);
   const filteredPersons = persons.filter(person => {
@@ -138,6 +138,6 @@ function App() {
       <Persons persons={filteredPersons} handleDelete={handleDelete} />
     </div>
   );
-};
+}
 
 export default App;

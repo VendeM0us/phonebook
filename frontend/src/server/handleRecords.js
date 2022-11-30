@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios from 'axios';
 const baseUrl = '/api/persons';
 
 const getAll = async () => {
@@ -18,7 +18,7 @@ const updateRecord = async (id, updatedRecord) => {
   const request = axios.put(url, updatedRecord);
   const response = await request;
   return response.data;
-}
+};
 
 const deleteRecord = async (id) => {
   const url = `${baseUrl}/${id}`;

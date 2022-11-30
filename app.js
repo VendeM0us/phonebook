@@ -38,14 +38,14 @@ app.put('/api/persons/:id', async (req, res, next) => {
 
   try {
     const updatePerson = await Person.findByIdAndUpdate(
-      req.params.id, 
-      updateObj, 
+      req.params.id,
+      updateObj,
       { new: true, runValidators: true, context: 'query' });
     updatePerson ? res.json(updatePerson) : next();
   } catch (e) {
     next(e);
   }
-})
+});
 
 app.delete('/api/persons/:id', async (req, res, next) => {
   try {
@@ -68,18 +68,18 @@ app.post('/api/persons', async (req, res, next) => {
   try {
     if (personExist) {
       const id = personExist.id;
-      
-      const updatedPerson = await Person.findByIdAndUpdate(id, 
+
+      const updatedPerson = await Person.findByIdAndUpdate(id,
         { number: body.number },
         { new: true, runValidators: true, context: 'query' });
-  
+
       res.json(updatedPerson);
     } else {
       const person = new Person({
         name: body.name,
         number: body.number,
       });
-  
+
       const newPerson = await person.save();
       res.status(201).json(newPerson);
     }

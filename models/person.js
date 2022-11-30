@@ -1,12 +1,12 @@
-import mongoose from "mongoose";
-import dotenv from "dotenv";
+import mongoose from 'mongoose';
+import dotenv from 'dotenv';
 
 dotenv.config();
 
 const url = process.env.MONGODB_URI;
 mongoose.connect(url)
-  .then(() => console.log("connected to MongoDB"))
-  .catch(e => console.error("Failed MongoDB connection: ", e));
+  .then(() => console.log('connected to MongoDB'))
+  .catch(e => console.error('Failed MongoDB connection: ', e));
 
 const personSchema = new mongoose.Schema({
   name: {
@@ -30,6 +30,6 @@ personSchema.set('toJSON', {
     delete returnedObject._id;
     delete returnedObject.__v;
   }
-})
+});
 
 export default mongoose.model('Person', personSchema);

@@ -1,4 +1,4 @@
-const Notification = ({message}) => {
+const Notification = ({ message }) => {
   if (!message) return;
 
   const notifColor = message.error ? 'red' : 'green';
