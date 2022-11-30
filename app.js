@@ -25,24 +25,24 @@ app.get('/api/persons/:id', async (req, res, next) => {
     const foundPerson = await Person.findById(req.params.id);
     foundPerson ? res.json(foundPerson) : next();
   } catch (e) {
-    console.error(e);
-
-    e.status = 400;
-    e.message = 'Malformatted id';
     next(e);
   }
 });
 
 app.put('/api/persons/:id', async (req, res, next) => {
+  const body = req.body;
+  const updateObj = {
+    name: body.name,
+    number: body.number,
+  };
+
   try {
-    const updatePerson = await Person.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const updatePerson = await Person.findByIdAndUpdate(
+      req.params.id, 
+      updateObj, 
+      { new: true, runValidators: true, context: 'query' });
     updatePerson ? res.json(updatePerson) : next();
   } catch (e) {
-    e.status = 400;
-    console.error(e);
-    
-    e.status = 400;
-    e.message = 'Malformatted id';
     next(e);
   }
 })
@@ -52,10 +52,6 @@ app.delete('/api/persons/:id', async (req, res, next) => {
     await Person.findByIdAndDelete(req.params.id);
     res.status(204).send();
   } catch (e) {
-    console.error(e);
-    
-    e.status = 400;
-    e.message = 'Malformatted id';
     next(e);
   }
 });
@@ -65,27 +61,30 @@ app.get('/api/persons', async (req, res) => {
   res.json(data);
 });
 
-app.post('/api/persons', async (req, res) => {
-  const newName = req.body.name;
-  const newNum = req.body.number;
-  const nameAlreadyExist = await Person.findOne({name: newName});
+app.post('/api/persons', async (req, res, next) => {
+  const body = req.body;
 
-  if (!newName || !newNum) {
-    res.status(400).json({
-      error: "Incomplete request body data (400)"
-    })
-  } else if (nameAlreadyExist) {
-    const id = nameAlreadyExist.id;
-    const updatedPerson = await Person.findByIdAndUpdate(id, { number: newNum }, { new: true });
-    res.json(updatedPerson);
-  } else {
-    const newPerson = new Person({
-      name: newName,
-      number: newNum
-    })
+  const person = new Person({
+    name: body.name,
+    number: body.number,
+  });
 
-    const createdPerson = await newPerson.save();
-    res.status(201).json(createdPerson);
+  try {
+    const personExist = await Person.findOne({ name: body.name });
+
+    if (personExist) {
+      console.log('person exists');
+      const id = personExist.id;
+      const updatedPerson = await Person.findByIdAndUpdate(id, 
+        { number: body.number },
+        { new: true, runValidators: true, context: 'query' });
+      res.json(updatedPerson);
+    } else {
+      const newPerson = await person.save();
+      res.status(201).json(newPerson);
+    }
+  } catch (e) {
+    next(e);
   }
 });
 
@@ -100,11 +99,21 @@ app.use((req, res) => {
 });
 
 app.use((err, req, res, next) => {
-  const status = err.status || 500;
+  console.error(err);
 
-  res.status(status).json({
+  if (err.name === 'CastError') {
+    res.status(400).json({ error: 'malformatted id' });
+  } else if (err.name === 'ValidationError') {
+    res.status(400).json({ error: err.message });
+  }
+
+  next(err);
+});
+
+app.use((err, req, res, next) => {
+  res.status(500).json({
     error: err.message,
-    status: status
+    status: 500
   })
 });
 

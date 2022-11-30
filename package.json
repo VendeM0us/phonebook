@@ -8,7 +8,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node app.js",
     "dev": "nodemon app.js",
-    "build:ui": "rm -rf dist && cd ../phonebook/ && yarn build && cp -r dist ../phonebook_backend",
+    "build:ui": "rm -rf dist && cd frontend/ && yarn build && mv dist ..",
     "deploy": "git add -A && git commit -m \"update and deploy\" && git push",
     "deploy:full": "yarn build:ui && yarn deploy"
   },
